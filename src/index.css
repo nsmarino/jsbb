@@ -1,5 +1,6 @@
 body {
   margin: 1em 2em;
+  box-sizing: border-box;
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen",
     "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue",
     sans-serif;
@@ -10,8 +11,34 @@ body {
 
 }
 
-.note {
-  color: orange;
+header {
+ background-color: gray;
+ padding: 1em;
+}
+
+header p {
+  text-align: right;
+}
+
+.userInfo {
+  align-self: flex-end;
+  justify-self: flex-start;
+  padding: 0 1em 0 0;
+  margin: .5em 1em 0 .5em;
+  border-right: 1px solid white;
+}
+
+input {
+  width: 20em;
+  height: 10em;
+}
+.post {
+  border: 1px solid white;
+  display: flex;
+}
+
+.postHeader {
+  font-size: .75em;
 }
 
 .error {
