@@ -4,7 +4,7 @@ const PostForm = ({ onSubmit, handleChange, value}) => {
   return (
     <div>
       <form onSubmit={onSubmit}>
-        <textarea rows="5" cols="83"
+        <textarea rows="5" cols="60"
           value={value}
           onChange={handleChange}
         />

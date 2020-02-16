@@ -1,7 +1,7 @@
 import React from 'react'
 import gavrilo from './gavrilo.jpg'
 
-const Post = ({post}) => {
+const Post = ({post, deletePost}) => {
     return (
       <div className="post">
 
@@ -14,6 +14,7 @@ const Post = ({post}) => {
         <p className="postHeader">by {post.user.username} on {post.date}</p>
         <p>{post.content}</p>
         <button onClick={()=>console.log('hello')}>edit</button>
+        <button onClick={deletePost}>delete</button>
         </div>
       </div>
     )
