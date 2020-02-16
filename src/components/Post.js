@@ -13,7 +13,7 @@ const Post = ({post, deletePost}) => {
         <div className="postBody">
         <p className="postHeader">by {post.user.username} on {post.date}</p>
         <p>{post.content}</p>
-        <button onClick={()=>console.log('hello')}>edit</button>
+        <button onClick={()=>console.log('this will edit posts once implemented')}>edit</button>
         <button onClick={deletePost}>delete</button>
         </div>
       </div>

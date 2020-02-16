@@ -32,7 +32,8 @@ header p {
 .post {
   border: 1px solid white;
   display: flex;
-  background-color: lightgray;
+  background-color: gainsboro;
+  color: black;
 }
 
 .postHeader {

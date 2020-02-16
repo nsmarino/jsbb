@@ -11,106 +11,10 @@ import Post from './components/Post'
 import PostForm from './components/PostForm'
 
 import postService from './services/posts'
-import loginService from './services/login' 
+import loginService from './services/login'
+import threadService from './services/threads'
 
 import Togglable from './components/Togglable'
-
-const sampleThread = {
-  posts: [
-    {
-    content: "this is the story",
-    date: "Sun Feb 16 2020 09:35:14 GMT-0500 (Eastern Standard Time)",
-    id: "5e49532260868925fc3043d6",
-    user: {
-      username: "juice",
-      name: "spontaneous",
-      id: "5e418ba056c2bf1c98e0887f"
-      }
-    },
-    {
-    content: "of me, and my life",
-    date: "Sun Feb 16 2020 11:49:21 GMT-0500 (Eastern Standard Time)",
-    id: "5e4972914312fc3ecc0cb618",
-    user: {
-      username: "juice",
-      name: "spontaneous",
-      id: "5e418ba056c2bf1c98e0887f"
-      }
-    }
-  ],
-  title: 'sample thread',
-  date: "Sun Feb 16 2020 09:35:14 GMT-0500 (Eastern Standard Time)",
-  user: {
-    username: "juice",
-    id: "5e418ba056c2bf1c98e0887f"
-  },
-  id: 1
-}
-
-const sampleThreadArray = [
-  {
-    posts: [
-      {
-      content: "this is the story",
-      date: "Sun Feb 16 2020 09:35:14 GMT-0500 (Eastern Standard Time)",
-      id: "5e49532260868925fc3043d6",
-      user: {
-        username: "juice",
-        name: "spontaneous",
-        id: "5e418ba056c2bf1c98e0887f"
-        }
-      },
-      {
-      content: "of me, and my life",
-      date: "Sun Feb 16 2020 11:49:21 GMT-0500 (Eastern Standard Time)",
-      id: "5e4972914312fc3ecc0cb618",
-      user: {
-        username: "juice",
-        name: "spontaneous",
-        id: "5e418ba056c2bf1c98e0887f"
-        }
-      }
-    ],
-    title: 'sample thread',
-    date: "Sun Feb 16 2020 09:35:14 GMT-0500 (Eastern Standard Time)",
-    user: {
-      username: "juice",
-      id: "5e418ba056c2bf1c98e0887f"
-    },
-    id: 1
-  },
-  {
-    posts: [
-      {
-      content: "how are you today",
-      date: "Sun Feb 16 2020 09:35:14 GMT-0500 (Eastern Standard Time)",
-      id: "5e49532260868925fc3043d6",
-      user: {
-        username: "juice",
-        name: "spontaneous",
-        id: "5e418ba056c2bf1c98e0887f"
-        }
-      },
-      {
-      content: "i saw your friend's band play",
-      date: "Sun Feb 16 2020 11:49:21 GMT-0500 (Eastern Standard Time)",
-      id: "5e4972914312fc3ecc0cb618",
-      user: {
-        username: "juice",
-        name: "spontaneous",
-        id: "5e418ba056c2bf1c98e0887f"
-        }
-      }
-    ],
-    title: 'alex g thread',
-    date: "Sun Feb 16 2020 09:35:14 GMT-0500 (Eastern Standard Time)",
-    user: {
-      username: "juice",
-      id: "5e418ba056c2bf1c98e0887f"
-    },
-    id: 2
-  }
-]
 
 const App = () => {
 //// STATE
@@ -122,27 +26,34 @@ const App = () => {
   const [posts, setPosts] = useState([])
   const [newPost, setNewPost] = useState('')
   
-  const [threads, setThreads] = useState(sampleThreadArray)
-  const [selectedThread, setSelectedThread] = useState(sampleThread)
+  const [threads, setThreads] = useState([])
+  const [selectedThread, setSelectedThread] = useState(null)
   const [newThreadTitle, setNewThreadTitle] = useState('')
   const [newThreadOP, setNewThreadOP] = useState('')
 
 //// EFFECT HOOKS
   useEffect(() => {
-    postService
+    threadService
       .getAll()
-      .then(initialPosts => setPosts(initialPosts))
+      .then(initialThreads => setThreads(initialThreads))
   }, [])
+
   // retrieve login info from local storage and set user token for posting
   useEffect(() => {
     const loggedUserJSON = window.localStorage.getItem('loggedNoteappUser')
     if (loggedUserJSON) {
       const user = JSON.parse(loggedUserJSON)
       setUser(user)
-      postService.setToken(user.token)
+      threadService.setToken(user.token)
     }
   }, [])
 
+
+  const getThreads = () => {
+    threadService
+      .getAll()
+      .then(res => console.log(res))
+  }
 //// USER ADMIN FUNCTIONS
   const handleLogin = async (event) => {
     event.preventDefault()
@@ -196,40 +107,48 @@ const App = () => {
   }
 
 //// POST FUNCTIONS
-  const postList = () => posts.map(post => <Post key={post.id} post={post} deletePost={() => deletePost(post)} />)
+  //const postList = () => posts.map(post => <Post key={post.id} post={post} deletePost={() => deletePost(post)} />)
   const handlePostChange = (event) => {
     setNewPost(event.target.value)
   }
   const addPost = (event) => {
     event.preventDefault()
-
+    const threadId = selectedThread.id
     const postObject = {
-      content: newPost,
-      date: new Date().toISOString(),
-      id: posts.length + 1,
+      post: newPost,
     }
-    postService
-    .create(postObject)
-    .then(data => {
-      setPosts(posts.concat(data))
-      setNewPost('')
-    })
+    console.log(threadId, postObject)
+    threadService
+      .update(threadId, postObject)
+      .then(updatedThread => {
+        console.log(updatedThread)
+        setThreads(threads.map(thread => thread.id !== updatedThread.id ? thread : updatedThread))
+        setSelectedThread(updatedThread)
+        setNewPost('')
+      })
+    // postService
+    // .create(postObject)
+    // .then(data => {
+    //   setPosts(posts.concat(data))
+    //   setNewPost('')
+    // })
   }
   const deletePost = (post) => {
-    if (window.confirm(`Ok to remove post?`)) { 
-      postService
-      .remove(post.id)
-      .then(postService.getAll)
-      .then(res => setPosts(res))
-      .catch(error => {
-        setErrorMessage(
-          `post cannot be removed - ${error.message}`
-        )
-        setTimeout(() => {
-          setErrorMessage(null)
-        }, 5000)
-      })
-    }
+    console.log('this will delete posts once implemented')
+    // if (window.confirm(`Ok to remove post?`)) { 
+    //   postService
+    //   .remove(post.id)
+    //   .then(postService.getAll)
+    //   .then(res => setPosts(res))
+    //   .catch(error => {
+    //     setErrorMessage(
+    //       `post cannot be removed - ${error.message}`
+    //     )
+    //     setTimeout(() => {
+    //       setErrorMessage(null)
+    //     }, 5000)
+    //   })
+    // }
   }
 
 //// THREAD FUNCTIONS
@@ -249,11 +168,9 @@ const App = () => {
   )
   const handleTitleChange = (event) => {
     setNewThreadTitle(event.target.value)
-    console.log(newThreadTitle)
   }
   const handleOPChange = (event) => {
     setNewThreadOP(event.target.value)
-    console.log(newThreadOP)
   }
   const addThread = (event) => {
     event.preventDefault()
@@ -269,6 +186,16 @@ const App = () => {
     setSelectedThread(clickedThread)
   }
 
+  const showSelectedThread = (thread) => {
+    if (thread === null) return
+    return <Thread
+    thread={selectedThread} 
+    deletePost={deletePost}
+    addPost={addPost}
+    newPost={newPost}
+    handlePostChange={handlePostChange}
+  />
+  }
 
 //// RENDER:
   return (
@@ -286,25 +213,20 @@ const App = () => {
       </header>
 
       <main>
+        <button onClick={getThreads}>LOG THREADS</button>
         <div id="allThreads" onClick={navigate}>
           {showThreadForm()}
           {threadList()}
         </div>
 
-          <Thread
+          {/* <Thread
             thread={selectedThread} 
             deletePost={deletePost}
             addPost={addPost}
             newPost={newPost}
             handlePostChange={handlePostChange}
-          />
-
-
-
-
-
-
-
+          /> */}
+          {showSelectedThread(selectedThread)}
           {/* <h2>PREVIOUS EFFORT</h2>
           {postList()}
           <PostForm 
